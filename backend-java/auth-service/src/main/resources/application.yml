@@ -6,6 +6,14 @@ spring:
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
+    # 连接池上限：默认 10 对多服务部署偏大（6 服务 x 10 = 60 连接会打满 MySQL 的
+    # max_connections）。2C2G 场景下 5 个足够，可用 DB_POOL_MAX 按环境覆盖。
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:5}
+      minimum-idle: ${DB_POOL_MIN:2}
+      connection-timeout: 10000
+      idle-timeout: 300000
+      max-lifetime: 1200000
 app.jwt.secret: ${JWT_SECRET_KEY:replace-this-with-a-long-random-secret-at-least-32-bytes}
 app.jwt.expiration-hours: ${JWT_EXPIRATION_HOURS:24}
 # 签发与验签必须使用同一算法，否则 token 无法互认
