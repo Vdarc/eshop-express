@@ -133,9 +133,9 @@ backend-java/preflight.py
 # 运维/压测脚本（一次性用途，且硬编码本地连接信息）
 test/
 
-# 原始数据集（爬虫产出，非代码）
-data/amazon/
-data/recommendation_data/
+# 本地数据集（体积大，不入库；仅保留 FAQ 检索数据）
+data/*
+!data/assistant_faq.json
 
 # 上传文件（用户数据）
 backend/uploads/
