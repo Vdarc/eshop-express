@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 业务级缓存级联失效，对应 Flask 的 {@code CacheManager.delete_related_caches}。
+ * 业务级缓存级联失效：一次写操作清理所有受影响的键。
  *
  * <p>键模板必须与 Python 侧完全一致，否则失效会「静默无效」—— 表现为数据改了但页面仍是旧值， 且日志里没有任何异常。这是跨语言共享缓存最典型的坑。
  *

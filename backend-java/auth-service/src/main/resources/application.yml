@@ -8,6 +8,6 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 app.jwt.secret: ${JWT_SECRET_KEY:replace-this-with-a-long-random-secret-at-least-32-bytes}
 app.jwt.expiration-hours: ${JWT_EXPIRATION_HOURS:24}
-# 必须与 Flask 的 JWT_ALGORITHM 保持一致，否则两边 token 无法互认
+# 签发与验签必须使用同一算法，否则 token 无法互认
 app.jwt.algorithm: ${JWT_ALGORITHM:HS256}
 management.endpoints.web.exposure.include: health,info,metrics,prometheus

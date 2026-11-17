@@ -20,7 +20,7 @@ public class TranslationStatController {
     public Map<String, Object> stats(
             @RequestParam(required = false) String date,
             @RequestParam(defaultValue = "30") int days) {
-        // Flask 的统计接口只返回 {code, data}，不带 msg
+        // 统计接口只返回 {code, data}，不带 msg
         return Map.of("code", 200, "data", service.stats(date, days));
     }
 

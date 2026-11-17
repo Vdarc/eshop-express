@@ -40,8 +40,8 @@ public class JwtService {
     /**
      * 签发 token。
      *
-     * <p>算法必须显式指定：JJWT 的 {@code signWith(key)} 会按密钥长度自动选择 （64 字节以上选 HS512），而 Flask 侧固定用
-     * HS256（{@code JWT_ALGORITHM}）。 不显式指定会导致 Java 签发的 token 在 Flask 侧验签失败，迁移期间两边无法互认。
+     * <p>算法必须显式指定：JJWT 的 {@code signWith(key)} 会按密钥长度自动选择 （64 字节以上选 HS512），而本服务固定用
+     * HS256（{@code JWT_ALGORITHM}）。 不显式指定会让签发与验签算法不一致，导致 token 无法互认。
      */
     public String issue(long id, String username, List<String> roles, List<String> permissions) {
         Instant now = Instant.now();
@@ -57,7 +57,7 @@ public class JwtService {
     }
 
     public io.jsonwebtoken.Claims parse(String token) {
-        // 解析时不锁定算法：迁移期需要同时接受 Java(HS256) 与历史 Flask token
+        // 解析时不锁定算法：需同时接受标准 HS256 与带自定义 claim 的历史 token
         return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
     }
 }

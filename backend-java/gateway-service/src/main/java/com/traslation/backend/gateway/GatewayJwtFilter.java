@@ -53,7 +53,7 @@ public class GatewayJwtFilter implements GlobalFilter, Ordered {
             if (GatewayAccessRules.requiresAdmin(path)
                     && (roles == null || !roles.contains("admin"))) return forbidden(exchange);
 
-            // 迁移期兼容：Java 签发的 token 把用户 ID 放在 sub，Flask 签发的放在 user_id。
+            // 兼容两种 token：用户 ID 可能在 sub，也可能在自定义 claim user_id。
             String userId = GatewayAccessRules.resolveUserId(claims);
             if (userId == null) return unauthorized(exchange);
             String username = Objects.toString(claims.get("username"), "");

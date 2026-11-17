@@ -60,8 +60,8 @@ public final class GatewayAccessRules {
     /**
      * 从 JWT 载荷解析用户 ID。
      *
-     * <p>迁移期两种签名并存：Java 的 {@code JwtService} 把用户 ID 放在标准 claim {@code sub}， Flask 的 {@code
-     * generate_token} 放在自定义 claim {@code user_id}。只认 {@code sub} 会让灰度期 Flask 签发的 token
+     * <p>两种 claim 位置并存：本服务把用户 ID 放在标准 claim {@code sub}， 早期 token 的 {@code
+     * generate_token} 放在自定义 claim {@code user_id}。只认 {@code sub} 会让早期 token
      * 打到网关时丢失身份，下游缺 {@code X-User-Id} 直接 500。
      *
      * @return 用户 ID；两种 claim 都没有时返回 null

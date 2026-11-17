@@ -16,7 +16,7 @@ import java.util.Map;
  */
 final class OperationAuditSupport {
 
-    /** 参数记录的占位符，与 Flask 侧 filter_image_data 保持一致。 */
+    /** 参数记录的占位符（图片等大字段脱敏）。 */
     static final String IMAGE_PLACEHOLDER = "[IMAGE_DATA_REMOVED]";
 
     /** 请求参数（含请求体）序列化后的最大长度，避免日志行过长。 */
@@ -27,7 +27,7 @@ final class OperationAuditSupport {
     /**
      * 路由与 HTTP 方法到中文动作的映射。
      *
-     * <p>动作文案与 Flask 侧 {@code @log_operation}/{@code write_operation_log} 完全一致， 未在 Flask 显式审计的路由返回
+     * <p>动作文案集中在此维护，未显式标注审计的路由返回
      * null（不写日志）。
      */
     static String action(String method, String uri) {
@@ -101,7 +101,7 @@ final class OperationAuditSupport {
                 && key.toLowerCase().matches(".*(password|passwd|token|secret|authorization).*");
     }
 
-    /** 客户端 IP 解析，优先级与 Flask 侧一致： X-Forwarded-For 首个地址 → X-Real-IP → remoteAddr。 */
+    /** 客户端 IP 解析，优先级： X-Forwarded-For 首个地址 → X-Real-IP → remoteAddr。 */
     static String clientIp(String forwardedFor, String realIp, String remoteAddr) {
         if (forwardedFor != null && !forwardedFor.isBlank())
             return forwardedFor.split(",", 2)[0].trim();

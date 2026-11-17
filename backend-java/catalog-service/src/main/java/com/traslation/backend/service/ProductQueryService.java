@@ -37,7 +37,7 @@ public class ProductQueryService {
         List<Object> args = new ArrayList<>();
         boolean hasSearch = search != null && !search.isBlank();
         if (hasSearch) {
-            // 与 Flask 一致：走 ngram 全文索引，而不是前置通配符 LIKE（那样无法用索引且有召回差异）
+            // 走 ngram 全文索引，而不是前置通配符 LIKE（那样无法用索引且有召回差异）
             where.append(" and match(")
                     .append(SEARCH_FIELDS)
                     .append(") against(? in boolean mode)");
@@ -65,7 +65,7 @@ public class ProductQueryService {
         }
         pageArgs.add((p - 1) * n);
         pageArgs.add(n);
-        // 取全列：Flask 的响应包含 13 个语种的标题/描述，只取当前语言会导致前端缺字段。
+        // 取全列：响应包含 13 个语种的标题/描述，只取当前语言会导致前端缺字段。
         List<Map<String, Object>> rows =
                 db.queryForList(
                         "select p.* from product p" + where + orderBy + " limit ?,?",
@@ -205,7 +205,7 @@ public class ProductQueryService {
                         country,
                         600,
                         true);
-        // 详情额外返回缩略图：Flask 取前 4 张，无图时用占位图生成 4 张
+        // 详情额外返回缩略图：取前 4 张，无图时用占位图生成 4 张
         List<String> urls = castUrls(product.get("image_urls"));
         List<String> thumbs = new ArrayList<>();
         if (urls.isEmpty()) {

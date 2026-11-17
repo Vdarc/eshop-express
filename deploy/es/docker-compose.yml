@@ -15,7 +15,7 @@
 # ⚠️ 内存要求（重要）
 #   ES 单节点至少需要约 1GB JVM 堆 + 约 1GB 堆外/文件缓存，实际占用常达 2GB 以上。
 #   - 本机开发：建议堆内存 1GB（下方 ES_JAVA_OPTS）
-#   - 若部署到 2C2G 的轻量服务器，ES 与 MySQL、Flask 同时运行会触发 OOM，
+#   - 若部署到 2C2G 的轻量服务器，ES 与 MySQL 同时运行会触发 OOM，
 #     请改用云托管 ES，或换用 Meilisearch / Typesense 这类轻量方案（见文末说明）
 
 services:

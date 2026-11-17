@@ -23,7 +23,7 @@ public final class PublishSupport {
                     "sports", "运动户外",
                     "car", "汽车用品");
 
-    /** 各平台禁用词，与 Flask 的 PLATFORM_RULES 保持一致。 */
+    /** 各平台禁用词表。 */
     private static final Map<String, List<String>> BANNED =
             Map.of(
                     "amazon", List.of("free", "guarantee", "best", "amazing"),
@@ -35,7 +35,7 @@ public final class PublishSupport {
 
     private PublishSupport() {}
 
-    /** 英文品类 key 转中文；未知品类回退「服装」（与 Flask 默认一致）。 */
+    /** 英文品类 key 转中文；未知品类回退「服装」。 */
     public static String categoryCn(String category) {
         if (category == null || category.isBlank()) return "服装";
         return CATEGORY_CN.getOrDefault(category.toLowerCase(Locale.ROOT), "服装");
@@ -44,7 +44,7 @@ public final class PublishSupport {
     /**
      * 单平台合规校验。
      *
-     * <p>未知平台返回通过且 {@code limit = Integer.MAX_VALUE}——对应 Flask 的 {@code
+     * <p>未知平台返回通过且 {@code limit = Integer.MAX_VALUE}——对应 {@code
      * float('inf')}，语义是「该平台无规则，不做长度限制」。
      */
     public static Map<String, Object> checkCompliance(String text, String platform) {

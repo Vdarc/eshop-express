@@ -13,7 +13,7 @@ import java.util.Objects;
  * 术语约束的翻译侧入口：读取用户术语库，其余逻辑统一委托给 {@link GlossaryRecall}。
  *
  * <p>之所以只保留取数、把召回/约束块/校验都放到 platform-common：术语召回在 「翻译链路」与「术语库 HTTP 接口」两处都要用，两套实现必然漂移 —— 之前就是 Java
- * 侧自己实现了一份「同品类进参考项」的逻辑，而 Flask 的参考项其实来自向量召回， 导致两侧返回结构虽然都是 mandatory/optional，语义却不一致。
+ * 侧自己实现了一份「同品类进参考项」的逻辑，而参考项实际来自向量召回，导致返回结构虽都是 mandatory/optional，语义却不一致。
  */
 final class GlossarySupport {
 

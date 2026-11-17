@@ -1,42 +1,36 @@
-# Spring Boot microservices
+# Spring Boot 微服务
 
-> **继续迁移前先读 [`后端迁移台账.md`](后端迁移台账.md)。** 它记录已覆盖接口、实现文件、行为差异和待办。每次迁移完成后必须同步更新台账和验证记录，避免重复实现或把部分实现误记为完整替换。
+Java 17 / Spring Boot 3.4 多模块 Gradle 工程。根构建包含一个共享库和六个可独立运行的服务。
 
-Java 17 / Spring Boot 3.4 multi-module Gradle project. The root Gradle build builds the shared library and six separately executable services:
-
-| Module | Port | Responsibility |
+| 模块 | 端口 | 职责 |
 | --- | ---: | --- |
-| `gateway-service` | 10600 | Single HTTP entry point, route dispatch, JWT validation, identity headers, CORS |
-| `auth-service` | 8081 | Login, registration, JWT issuance, role/menu loading |
-| `catalog-service` | 8082 | Product browsing, merchant-owned product edit/unpublish, Elasticsearch search/indexing, Canal CDC and MySQL fallback |
-| `translation-service` | 8083 | OpenAI-compatible LLM translation, history, daily/monthly statistics and scheduled reports |
-| `recommendation-service` | 8084 | Hybrid content/collaborative recommendations, profile and cultural tags, Redis cache and exposure logging; batched AI inference client |
-| `platform-service` | 8085 | Glossary, admin, dashboard, click/compliance stats, profiles, product publishing, uploads, RAG assistant |
-| `platform-common` | — | Shared response, exception, and MVC operation audit support |
+| `gateway-service` | 10600 | 唯一 HTTP 入口，路由分发、JWT 校验、身份头注入、CORS |
+| `auth-service` | 8081 | 登录、注册、JWT 签发、角色与菜单装配 |
+| `catalog-service` | 8082 | 商品浏览、商家商品编辑/下架、ES 检索与索引、Canal CDC、MySQL 兜底 |
+| `translation-service` | 8083 | OpenAI 兼容协议的 LLM 翻译、历史、日/月统计与定时报表 |
+| `recommendation-service` | 8084 | 混合推荐、用户画像与文化标签、Redis 缓存与曝光日志、AI 推理客户端 |
+| `platform-service` | 8085 | 术语库、管理端、仪表盘、点击/合规统计、个人中心、商品发布、上传、RAG 客服 |
+| `platform-common` | — | 统一响应体、异常处理、MVC 操作审计 |
 
-## Primary keys
+## 主键设计
 
-Every table uses a 64-bit Snowflake id instead of AUTO_INCREMENT — no table has a
-database-generated key anymore, so **an insert must supply its id explicitly**.
-`SnowflakeIdGenerator` (in `platform-common`) produces `41-bit timestamp | 10-bit
-worker | 12-bit sequence`; inject it and call `nextId()` before the insert.
+所有表使用 64 位雪花 ID，**没有一张表用 AUTO_INCREMENT**，因此插入必须显式提供 id。
+`SnowflakeIdGenerator`（在 `platform-common`）生成 `41 位时间戳 | 10 位 worker | 12 位序列`，
+注入后调用 `nextId()` 再执行 insert。
 
-The worker id defaults to `server.port % 1024` (8081→913, 8082→914 ...), which keeps
-concurrent services from colliding without any per-service configuration. Override it
-with `-Dapp.id.worker-id=N` only when the port heuristic cannot work (e.g. the same
-port on several hosts).
+worker id 默认取 `server.port % 1024`（8081→913、8082→914……），
+这样多服务并发时天然不撞号，无需逐个配置。只有端口推导失效的场景（如多台机器共用同一端口）
+才需要用 `-Dapp.id.worker-id=N` 覆盖。
 
-Ids are about 19 digits, beyond JavaScript's `Number.MAX_SAFE_INTEGER`, so
-`IdGeneratorConfiguration` serialises `Long` as a **string**. Front-end code must treat
-ids as opaque strings — never `parseInt` them or compare them numerically.
+ID 约 19 位，超过 JavaScript 的 `Number.MAX_SAFE_INTEGER`，因此
+`IdGeneratorConfiguration` 把 `Long` 序列化为**字符串**。前端必须把 id 当作不透明字符串，
+禁止 `parseInt` 或数值比较。
 
-`migrate_snowflake.py` performed the one-off conversion (id remap, `int→bigint`,
-AUTO_INCREMENT removal, foreign keys dropped and rebuilt). It is idempotent-ish and
-supports `--dry-run`, but treat it as a migration artifact rather than a routine task.
+## 本地运行
 
-## Run locally
-
-Requires Java 17+, an existing `ecommerce` MySQL schema, and environment variables `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, and `JWT_SECRET_KEY`. The checked-in Gradle wrapper downloads Gradle 8.9 when first used. Start services in separate terminals from this directory:
+需要 Java 17+、已初始化的 `ecommerce` MySQL 库，以及环境变量 `DB_URL`、`DB_USERNAME`、
+`DB_PASSWORD`、`JWT_SECRET_KEY`。仓库内自带 Gradle wrapper，首次使用会下载 Gradle 8.9。
+在本目录下分别启动各服务：
 
 ```powershell
 ./gradlew :gateway-service:bootRun
@@ -47,32 +41,53 @@ Requires Java 17+, an existing `ecommerce` MySQL schema, and environment variabl
 ./gradlew :platform-service:bootRun
 ```
 
-Or build and start the containers from the repository root with `docker compose -f deploy/docker-compose.java.yml up --build`. The Compose file expects MySQL to be available from the host and requires `DB_PASSWORD` and `JWT_SECRET_KEY`.
+或在仓库根目录用 `docker compose -f deploy/docker-compose.java.yml up --build` 构建并启动容器。
+Compose 假定 MySQL 在宿主机可用，并要求 `DB_PASSWORD`、`JWT_SECRET_KEY`。
 
-### Run from IntelliJ IDEA
+### 用 IntelliJ IDEA 打开
 
-This folder is an independent Gradle build. Open it as its own project (`File → Open →` pick `settings.gradle` `→ Open as Project`) so IDEA resolves the Spring Boot classpath. Opening the repository root instead yields a single Python module, and the `main` methods will not even compile.
+本目录是独立的 Gradle 构建。请作为单独项目打开（`File → Open →` 选中 `settings.gradle`
+`→ Open as Project`），IDEA 才能正确解析 Spring Boot 类路径。
 
-Six run configurations are checked in under `.run/`; they pin `--server.port`, carry the environment variables below, and add the Elasticsearch truststore for catalog. If IDEA flags a configuration's module as missing, re-pick it in the Module dropdown — the rest can stay as-is.
+Spring Boot **不读**仓库根目录的 `.env`，`application.yml` 里每个 `${VAR:default}`
+都必须以环境变量的形式提供。两个容易踩的坑：缺 `DB_PASSWORD` 时服务能正常启动，
+但每个请求都返回 500（`Access denied for user 'root'@'localhost' (using password: NO)`）；
+`ES_URL` 填错不会报错，而是让 catalog 静默回落 MySQL ngram（「T恤」从 568 条掉到 28 条）。
 
-Spring Boot does not read the repository `.env`, so every `${VAR:default}` in `application.yml` must be supplied as an environment variable. Two failures worth knowing: a missing `DB_PASSWORD` starts the service fine but every request returns 500 with `Access denied for user 'root'@'localhost' (using password: NO)`, and a wrong `ES_URL` makes catalog silently fall back to MySQL ngram (T恤 drops from 568 hits to 28) instead of reporting an error.
+两个组件不在 Gradle 里：10683 的向量推理服务（`start-embedding.bat`）和
+20682 的 Vite 开发服务器（`start-frontend.bat`）。推荐与 RAG 客服依赖前者。
+`run-all.bat` 会连同环境变量一起启动全部八个进程。
 
-Two stack components are outside Gradle: the Python embedding service on 10683 (`start-embedding.bat`) and the Vite dev server on 20682 (`start-frontend.bat`). Recommendation and the RAG assistant depend on the former. `run-all.bat` starts all eight processes with their environment variables already set.
+### 检索与同步配置
 
-Catalog search reads `ES_URL`, `ES_INDEX`, `ES_USERNAME`, `ES_PASSWORD`, `ES_ENABLED`, and `ES_USE_FOR_BROWSE` (false by default to keep unfiltered browse on MySQL). After deploying a fresh index, invoke the internal catalog endpoint `POST /internal/search/reindex` to create and populate it from MySQL. Product publish/edit/unpublish operations synchronize their documents after commit. The optional Canal consumer is controlled by `CANAL_ENABLED`, `CANAL_HOST`, `CANAL_PORT`, `CANAL_DESTINATION`, `CANAL_USERNAME`, `CANAL_PASSWORD`, `CANAL_CLIENT_ID`, `CANAL_FILTER`, `CANAL_BATCH_SIZE`, and `CANAL_TIMEOUT_MS`; it is disabled by default in Compose during the Python/Java transition. After stopping the Python consumer, enable it with `CANAL_ENABLED=true`; the default Canal address is `host.docker.internal:11111`. `GET /api/search/status` includes Canal connection and processed event counters. For HTTPS Elasticsearch using a private CA, add that CA to the JVM truststore.
+catalog 的检索读取 `ES_URL`、`ES_INDEX`、`ES_USERNAME`、`ES_PASSWORD`、`ES_ENABLED`、
+`ES_USE_FOR_BROWSE`（默认 false，让无关键词浏览走 MySQL）。部署新索引后，
+调用内部接口 `POST /internal/search/reindex` 从 MySQL 建库并灌数据。
+商品的发布/编辑/下架在事务提交后同步文档。
 
-The gateway routes public catalog reads and login/register without a token. Other `/api/**` routes require a valid bearer JWT. Gateway ports alone are published by Compose; service ports remain internal. Actuator health is available at `/actuator/health` on each service.
+可选的 Canal 消费者由 `CANAL_ENABLED`、`CANAL_HOST`、`CANAL_PORT`、`CANAL_DESTINATION`、
+`CANAL_USERNAME`、`CANAL_PASSWORD`、`CANAL_CLIENT_ID`、`CANAL_FILTER`、`CANAL_BATCH_SIZE`、
+`CANAL_TIMEOUT_MS` 控制，默认关闭。`GET /api/search/status` 会返回 Canal 连接状态与已处理事件数。
+使用私有 CA 的 HTTPS Elasticsearch 需要把该 CA 导入 JVM truststore。
 
-## Python AI inference boundary
+网关对公开的商品读取与登录注册放行，其余 `/api/**` 需要合法 Bearer JWT。
+Compose 只发布网关端口，服务端口留在内部。每个服务的健康检查在 `/actuator/health`。
 
-The embedding model stays in Python as proposed in `Java重写方案-亮点清单.md`. Run it with `uvicorn backend.ai_service:app --host 0.0.0.0 --port 10683`. It exposes batch `POST /embed` and `POST /similarity`; Java recommendation and RAG services use the recommendation service's internal AI endpoints to call it over HTTP. Set `EMBEDDING_SERVICE_URL` when the service is not on the default address. Recommendation LLM keyword parsing and cultural-tag selection use `LLM_BASE_URL`, `LLM_API_KEY`, and `LLM_MODEL_NAME`; if no key is configured, lexical scoring and rule-based fallback tags remain available.
+## 向量推理服务
 
-## Migration status
+语义向量编码由独立的 Python 进程承担，不在 JVM 内加载模型：
 
-See [`后端迁移台账.md`](后端迁移台账.md) before changing backend coverage. It is the source of truth for migrated endpoints, implementation gaps, and next steps.
+```bash
+uvicorn backend.ai_service:app --host 0.0.0.0 --port 10683
+```
 
-Most user-facing CRUD and commerce flows now have Java endpoints: login/register, product browsing and merchant ownership operations, publish/unpublish, image/avatar upload, profiles, glossary, admin and merchant review, translation/history/statistics, click and dashboard statistics, compliance, and RAG assistant. Product publishing calls translation, persists the legacy MySQL records, clears recommendation cache, and schedules a fresh recommendation on a bounded executor. Recommendation now combines content scoring and the legacy simulated-user rating matrix, applies market tags, records exposures, and caches results in Redis for 30 minutes. The Python embedding model remains the planned AI inference boundary; its matching simulated-user data is packaged in the recommendation module without the source fixture's unused credential fields.
+对外提供批量 `POST /embed` 与 `POST /similarity`；Java 侧的推荐与 RAG 客服通过
+recommendation 服务的内部 AI 端点以 HTTP 调用。地址不是默认值时设 `EMBEDDING_SERVICE_URL`。
 
-The Java services are not yet a full replacement for Flask. RAG assistant API and retrieval orchestration now run in `platform-service`; the embedding model remains in the Python inference service. Configure `LLM_API_KEY`, `EMBEDDING_SERVICE_URL`, and `ASSISTANT_FAQ_PATH` (Compose mounts the FAQ file and persists Java indexes in a named volume). RAG conversation state is per Java instance. `/api/health/deps` now aggregates Redis circuit state and Elasticsearch cluster health through internal service endpoints. Java search supports IK when installed and otherwise the built-in CJK analyzer, completion plus phrase-prefix suggestions, a longest-token query strategy and highlights, and the Canal TCP consumer. Its token selection is not identical to Python Jieba; live ES/Canal/MySQL/Redis integration verification remains. Glossary Java recall currently covers user terms and synonym/literal matching, without semantic retrieval. Run Python as the production backend until remaining functions are migrated and parity has been verified. Services share the legacy MySQL schema during transition.
+推荐的关键词解析与文化标签选择使用 `LLM_BASE_URL`、`LLM_API_KEY`、`LLM_MODEL_NAME`；
+未配置 key 时仍有词法打分与规则标签兜底。
 
-Uploads use `UPLOAD_DIR` (local default `../backend/uploads`). The Java Compose file mounts `backend/uploads` into the platform container so the gateway can serve `/uploads/**` from the same directory.
+## 上传目录
+
+上传走 `UPLOAD_DIR`（本地默认 `../backend/uploads`）。Compose 把 `backend/uploads`
+挂进 platform 容器，使网关能从同一目录提供 `/uploads/**`。

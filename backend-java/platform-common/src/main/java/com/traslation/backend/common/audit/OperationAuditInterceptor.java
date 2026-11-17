@@ -12,7 +12,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.WebUtils;
 
-/** Records the same opted-in operations that Flask decorates or logs explicitly. */
+/** Records the operations that are explicitly marked for auditing. */
 public final class OperationAuditInterceptor implements HandlerInterceptor {
     private static final String START_ATTRIBUTE =
             OperationAuditInterceptor.class.getName() + ".start";

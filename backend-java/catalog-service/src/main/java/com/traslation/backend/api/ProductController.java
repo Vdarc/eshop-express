@@ -42,7 +42,7 @@ public class ProductController {
             @RequestParam(required = false) String country) {
         var product = products.byEsin(esin, language, country);
         if (product == null) throw new BusinessException(HttpStatus.NOT_FOUND, "商品不存在");
-        // Flask 的详情接口返回 {code, data}，与列表接口的裸结构不同
+        // 详情接口返回 {code, data}，与列表接口的裸结构不同
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("code", 200);
         body.put("data", product);
@@ -51,7 +51,7 @@ public class ProductController {
 
     @GetMapping("/api/search/status")
     public Map<String, Object> searchStatus() {
-        // 保持与 Flask 完全一致的字段集合；Canal 状态另走内部接口（Flask 无此字段）
+        // 字段集合保持稳定；Canal 状态另走内部接口
         return Map.of("code", 200, "data", searchIndex.status());
     }
 

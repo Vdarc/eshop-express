@@ -16,10 +16,10 @@ import java.util.*;
 /**
  * 术语库接口。
  *
- * <p>两点与 Flask 保持严格一致，否则前端行为会变：
+ * <p>两点行为必须稳定，否则前端会变：
  *
  * <ul>
- *   <li><b>成功/失败都返回 HTTP 200</b>，业务状态放在 body 的 {@code code} 里。 Flask 全部走 {@code
+ *   <li><b>成功/失败都返回 HTTP 200</b>，业务状态放在 body 的 {@code code} 里，全部走 {@code
  *       jsonify({...})}，校验失败也是 200 + code=400， 前端 axios 不会进 reject 分支。
  *   <li><b>字段名用 {@code foreign}</b>。{@code foreign} 是 MySQL 保留字，SQL 里必须加反引号，
  *       一旦漏掉会静默查不到数据（异常被上层兜住时尤其难查）。
@@ -85,7 +85,7 @@ public class GlossaryController {
             sql.append(" and language=?");
             args.add(language);
         }
-        // Flask 用 query.all()，实际按主键升序；用 create_time 排序会让列表顺序整体相反
+        // 按主键升序返回；用 create_time 排序会让列表顺序整体相反
         sql.append(" order by id");
         return ok(db.queryForList(sql.toString(), args.toArray()));
     }
@@ -131,7 +131,7 @@ public class GlossaryController {
 
         Map<String, Object> existing = findById(id, uid);
         if (existing == null) return error(500, "更新失败");
-        // 改了中文或语言才需要查重，与 Flask 的条件一致
+        // 仅当改了中文或语言时才需要查重
         boolean changed =
                 !chinese.equals(text(existing.get("chinese")))
                         || !language.equals(text(existing.get("language")));
@@ -170,7 +170,7 @@ public class GlossaryController {
         Map<String, Object> existing = findById(id, uid);
         if (existing == null) return error(500, "删除失败");
         db.update("delete from sys_glossary where id=? and user_id=?", id, uid);
-        // Flask 删除时不带 language，只清全部语言聚合键；这里把具体语言键也一并清掉更稳妥
+        // 删除时除清全部语言的聚合键，也把具体语言键一并清掉
         cache.evictGlossary(uid, text(existing.get("language")));
         return new LinkedHashMap<>(Map.of("code", 200, "msg", "删除成功"));
     }
@@ -287,7 +287,7 @@ public class GlossaryController {
             }
             return out;
         } catch (Exception e) {
-            // 向量服务不可用时降级为纯字面召回，与 Flask 的懒加载降级一致
+            // 向量服务不可用时降级为纯字面召回
             return List.of();
         }
     }

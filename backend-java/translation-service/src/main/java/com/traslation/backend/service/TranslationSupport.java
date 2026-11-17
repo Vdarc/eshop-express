@@ -8,11 +8,11 @@ import java.util.Objects;
 /**
  * 翻译模块的字符串/数值辅助逻辑。
  *
- * <p>翻译历史用「分号 + 空格」把数组存成单列字符串（Flask 侧 {@code "; ".join()}）， 这里保持一致的写入格式，读取时额外兼容只有分号没有空格的历史数据。
+ * <p>翻译历史用「分号 + 空格」把数组存成单列字符串（分隔符为分号加空格）， 写入格式固定，读取时额外兼容只有分号没有空格的历史数据。
  */
 final class TranslationSupport {
 
-    /** 与 Flask 写入格式一致的分隔符。 */
+    /** 存储数组时使用的分隔符。 */
     static final String SEPARATOR = "; ";
 
     /** 读取时兼容 "; " 与 ";" 两种写法。 */
@@ -20,7 +20,7 @@ final class TranslationSupport {
 
     private TranslationSupport() {}
 
-    /** 列表 → 存储字符串；非集合类型返回空串（与 Flask 的 isinstance(list) 判断一致）。 */
+    /** 列表 → 存储字符串；非集合类型返回空串。 */
     static String joinValues(Object value) {
         if (value instanceof Collection<?> collection)
             return String.join(

@@ -55,7 +55,7 @@ public class TranslationService {
             throw new BusinessException(
                     HttpStatus.SERVICE_UNAVAILABLE, "LLM service is not configured");
 
-        // 1. 翻译前召回术语并生成约束块（与 Flask 一致：注入 prompt，而非事后替换）
+        // 1. 翻译前召回术语并生成约束块（注入 prompt，而非事后替换）
         GlossaryRecall.Recalled recalled =
                 GlossarySupport.recall(
                         text, GlossarySupport.loadTerms(db, parseUserId(userId), language));
@@ -131,11 +131,11 @@ public class TranslationService {
             if (normalizeText(parsed.get("versionC")) == null) parsed.put("versionC", base);
             parsed.put("base_translation", base);
 
-            // 2. 兜底字段：模型偶尔漏字段，Flask 会给默认值，这里保持一致
+            // 2. 兜底字段：模型偶尔漏字段，统一补默认值，保证响应结构稳定
             fillDefaults(parsed, text, language);
 
             // 3. 翻译后校验术语落地（只上报，不改译文）
-            // Flask 侧无条件附带 glossary_report（即使 0 条强制术语），保持响应结构一致
+            // 无条件附带 glossary_report（即使 0 条强制术语），保持响应结构稳定
             parsed.put("glossary_report", GlossarySupport.verify(base, recalled));
 
             try {
@@ -182,7 +182,7 @@ public class TranslationService {
         return s.isEmpty() ? null : s;
     }
 
-    /** 补齐模型可能漏掉的字段，取值与 Flask 的默认策略一致。 */
+    /** 补齐模型可能漏掉的字段，保证各类输入下响应结构稳定。 */
     private static void fillDefaults(Map<String, Object> parsed, String text, String language) {
         Object points = parsed.get("core_selling_points");
         if (!(points instanceof List<?> list) || list.isEmpty())
@@ -383,8 +383,8 @@ public class TranslationService {
                         "select stat_date,translate_char_count,translate_api_cost from"
                             + " translate_daily_report where stat_date>=? and stat_date<=? order by"
                             + " stat_date",
-                        // 与 Flask 的 trend_start = now - days 对齐：包含当天在内共 span+1 个点。
-                        // 原先写 minusDays(span - 1) 会少返回一天，图表比 Flask 少一个数据点。
+                        // 趋势起点取 now - days：包含当天在内共 span+1 个点。
+                        // 写成 minusDays(span - 1) 会少返回一天，图表缺一个数据点。
                         java.sql.Date.valueOf(current.minusDays(span)),
                         java.sql.Date.valueOf(current));
         List<String> dates = new ArrayList<>();

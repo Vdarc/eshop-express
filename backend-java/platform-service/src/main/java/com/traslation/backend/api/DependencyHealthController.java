@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-/** Aggregates the same Redis and Elasticsearch diagnostics exposed by Flask. */
+/** Aggregates Redis and Elasticsearch diagnostics behind a single endpoint. */
 @RestController
 public class DependencyHealthController {
     private final RestClient recommendation;

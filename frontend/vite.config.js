@@ -37,7 +37,7 @@ export default defineConfig({
     allowedHosts: ['frp-put.com'],
     proxy: {
       '/api': {
-        // 指向 Java 网关（原 Flask 10682 已下线）
+        // 指向网关
         target: 'http://127.0.0.1:10600',
         changeOrigin: true
       },

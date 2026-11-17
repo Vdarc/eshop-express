@@ -58,14 +58,14 @@ public class ProductPublishService {
                         .toList();
         if (languages.isEmpty()) languages = List.of("en");
         List<String> platforms = values(body.get("target_platforms"), "amazon");
-        // Flask 是 str(uuid4())[:10].upper()，结果形如 8FDA8F74-B（第 9 位是连字符）。
+        // esin 取 uuid4 前 10 位转大写，结果形如 8FDA8F74-B（第 9 位是连字符）。
         // 这里若去掉连字符会变成 10 位纯字符，与历史数据的格式不一致。
         String esin = UUID.randomUUID().toString().substring(0, 10).toUpperCase(Locale.ROOT);
         String categoryCn = PublishSupport.categoryCn(category);
         Map<String, Object> translations = new LinkedHashMap<>(),
                 translatedTitles = new HashMap<>();
         String primary = languages.get(0);
-        // Flask 只为主目标语言写入标题/描述译文，其余语种列按 fill_null_fields_with_esin 填 ESIN。
+        // 只为主目标语言写入标题/描述译文，其余语种列填 ESIN 占位。
         // 这里保持一致：否则同一条数据在两侧的 en_title/ar_title 会不同。
         Map<String, Object> primaryDesc =
                 translate(description, primary, categoryCn, country, userId, username);

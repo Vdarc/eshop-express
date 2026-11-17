@@ -9,7 +9,7 @@ import java.security.MessageDigest;
 import java.util.HexFormat;
 
 /**
- * 兼容 Flask(werkzeug) 与 BCrypt 两类历史密码哈希。
+ * 兼容 werkzeug 与 BCrypt 两类密码哈希。
  *
  * <p>现存数据有三种格式：
  *
@@ -19,7 +19,7 @@ import java.util.HexFormat;
  *   <li>{@code pbkdf2:sha256:600000$salt$hex} —— werkzeug 旧版默认
  * </ul>
  *
- * <p>只认 BCrypt 会导致迁移后 Flask 期间注册的账号全部无法登录，属于必须处理的兼容问题。
+ * <p>只认 BCrypt 会让早期注册的账号全部无法登录，属于必须处理的兼容问题。
  */
 @Component
 public class PasswordVerifier {

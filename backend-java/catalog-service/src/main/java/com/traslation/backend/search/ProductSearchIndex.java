@@ -88,7 +88,7 @@ public class ProductSearchIndex {
         Object docs = null;
         Integer mysql = null;
         try {
-            // 与 Flask 的 cluster_info 一致：只回归一化的四个字段，不回 ES 原始根信息
+            // 只回归一化的四个字段，不回 ES 原始根信息
             Map<?, ?> health = es.get().uri("/_cluster/health").retrieve().body(Map.class);
             Map<?, ?> root = es.get().uri("/").retrieve().body(Map.class);
             Map<?, ?> version =

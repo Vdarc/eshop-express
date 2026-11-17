@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * 价格换算：人民币 → 目标国家货币。
  *
- * <p>汇率与格式化规则与 Flask 的 {@code backend/services/currency_converter.py} 保持一致， 否则同一个商品在两个实现下会显示不同价格。
+ * <p>汇率与格式化规则集中在此，避免同一商品在不同调用路径下显示不同价格。
  */
 final class CurrencyRates {
 
@@ -45,9 +45,9 @@ final class CurrencyRates {
     private CurrencyRates() {}
 
     /**
-     * 换算价格。未知国家按「中国」处理，与 Flask 一致。
+     * 换算价格。未知国家按「中国」处理。
      *
-     * @return 与 Flask 同构的 map：price / formatted_price / currency / symbol / country
+     * @return 结构固定的 map：price / formatted_price / currency / symbol / country
      */
     static Map<String, Object> convert(double priceCny, String country) {
         String target = country != null && RATES.containsKey(country) ? country : "中国";

@@ -14,7 +14,7 @@ import java.util.Set;
  */
 final class ProductQuerySupport {
 
-    /** 支持的目标语言；不在此集合内一律回落 zh，与 Flask 侧一致。 */
+    /** 支持的目标语言；不在此集合内一律回落 zh。 */
     static final Set<String> LANGS =
             Set.of("zh", "en", "ar", "fr", "de", "ja", "ko", "ru", "th", "vi", "ms", "id", "tl");
 
@@ -45,7 +45,7 @@ final class ProductQuerySupport {
     /**
      * 把图片与派生字段写回商品行。
      *
-     * <p>{@code image_url} 取首图，没有图片时为 null；{@code foreign_title/foreign_desc} 用于兼容前端旧字段名，保持与 Flask
+     * <p>{@code image_url} 取首图，没有图片时为 null；{@code foreign_title/foreign_desc} 用于兼容前端旧字段名，保持与既有响应
      * 响应一致。
      */
     static void attachImages(
@@ -70,11 +70,11 @@ final class ProductQuerySupport {
         return total <= 0 || size <= 0 ? 0 : (int) Math.ceil((double) total / size);
     }
 
-    /** 目标语言探测顺序（与 Flask 的 language_priority 一致，不含 zh）。 */
+    /** 目标语言探测顺序（不含 zh）。 */
     private static final List<String> TARGET_LANG_PRIORITY =
             List.of("en", "ar", "fr", "de", "ja", "ko", "ru", "th", "vi", "ms", "id", "tl");
 
-    /** 对外返回的 13 个语种，顺序与 Flask 一致。 */
+    /** 对外返回的 13 个语种，顺序固定。 */
     private static final List<String> ALL_LANGS =
             List.of("zh", "en", "ar", "fr", "de", "ja", "ko", "ru", "th", "vi", "ms", "id", "tl");
 
@@ -90,7 +90,7 @@ final class ProductQuerySupport {
     /**
      * 组装单个商品的对外结构。
      *
-     * <p>字段集合与取值规则严格对齐 Flask 的 {@code _format_product}： 13 语种标题/描述、目标语言探测、无图占位、按国家换算的价格。
+     * <p>字段集合与取值规则： 13 语种标题/描述、目标语言探测、无图占位、按国家换算的价格。
      *
      * @param row 商品行（`select p.*` 的结果，列名即字段名）
      * @param imageUrls 已按 sort 排序的图片地址
@@ -108,7 +108,7 @@ final class ProductQuerySupport {
 
         List<String> urls = imageUrls == null || imageUrls.isEmpty() ? List.of() : imageUrls;
         if (urls.isEmpty() && placeholderWhenEmpty) {
-            // Flask 用 hash(esin) 生成占位图，Python 的 hash 每次进程启动都不同，
+            // 占位图用 esin 的稳定哈希生成 —— 不能用进程内随机 hash，
             // 这里用稳定哈希代替，保证同一商品每次得到同一张图。
             int seed = Math.abs(esin == null ? 0 : esin.hashCode()) % 1000;
             urls =
