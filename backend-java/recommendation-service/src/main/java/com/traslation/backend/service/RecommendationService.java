@@ -2,6 +2,7 @@ package com.traslation.backend.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.traslation.backend.common.id.SnowflakeIdGenerator;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,6 +25,7 @@ public class RecommendationService {
     private final RecommendationProfileService profiles;
     private final CollaborativeData collaborative;
     private final ObjectMapper json;
+    private final SnowflakeIdGenerator idGenerator;
     private final RestClient llm;
     private final String llmModel;
     private final boolean llmConfigured;
@@ -39,6 +41,7 @@ public class RecommendationService {
             RecommendationProfileService profiles,
             CollaborativeData collaborative,
             ObjectMapper json,
+            SnowflakeIdGenerator idGenerator,
             @Value("${app.llm.base-url:https://api.deepseek.com}") String llmBaseUrl,
             @Value("${app.llm.api-key:}") String llmApiKey,
             @Value("${app.llm.model:deepseek-chat}") String llmModel,
@@ -49,6 +52,7 @@ public class RecommendationService {
         this.profiles = profiles;
         this.collaborative = collaborative;
         this.json = json;
+        this.idGenerator = idGenerator;
         this.llmModel = llmModel;
         this.llmConfigured = llmApiKey != null && !llmApiKey.isBlank();
         this.imageBaseUrl = imageBaseUrl.replaceAll("/$", "");
@@ -449,12 +453,19 @@ public class RecommendationService {
     private void recordExposure(List<Map<String, Object>> recs) {
         if (recs.isEmpty()) return;
         try {
-            List<Object[]> rows = recs.stream().map(p -> new Object[] {p.get("id"), 1}).toList();
+            // biz_rec_stat_log.id 是雪花主键且无自增，必须显式提供。
+            // 原实现不带 id，在当前库上必抛 ERROR 1364，而异常又被这里吞掉 ——
+            // 结果是「曝光埋点从未写入成功」，/api/dashboard 的 click_rate 分母恒 0。
+            List<Object[]> rows =
+                    recs.stream()
+                            .map(p -> new Object[] {idGenerator.nextId(), p.get("id"), 1})
+                            .toList();
             db.batchUpdate(
-                    "insert into biz_rec_stat_log(product_id,action_type,create_time)"
-                        + " values(?,?,now())",
+                    "insert into biz_rec_stat_log(id,product_id,action_type,create_time)"
+                        + " values(?,?,?,now())",
                     rows);
         } catch (Exception ignored) {
+            // 埋点失败不能影响推荐主流程
         }
     }
 

@@ -63,6 +63,11 @@ const DICT = {
   noRating: { zh: '暂无评价', en: 'No reviews yet', ar: 'لا تقييمات' },
   refPrice: { zh: '参考价', en: 'Reference price', ar: 'سعر مرجعي' },
   esin: { zh: 'ESIN', en: 'ESIN', ar: 'ESIN' },
+  esinFull: {
+    zh: 'ESIN · E-shop Standard Identification Number（E-shop 标准商品标识）',
+    en: 'ESIN · E-shop Standard Identification Number',
+    ar: 'ESIN · رقم التعريف القياسي للمنتج في E-shop'
+  },
   market: { zh: '目标市场', en: 'Target market', ar: 'السوق المستهدف' },
   langsAvailable: { zh: '已有语种', en: 'Languages', ar: 'اللغات' },
   mainImage: { zh: '商品主图', en: 'Product image', ar: 'صورة المنتج' },
@@ -161,7 +166,7 @@ const DICT = {
   publishAnother: { zh: '再发布一个', en: 'Publish another', ar: 'نشر منتج آخر' },
   viewProduct: { zh: '查看商品详情', en: 'View product', ar: 'عرض المنتج' },
   backToCompliance: { zh: '← 返回违规处理', en: '← Back to violations', ar: '→ رجوع إلى المخالفات' },
-  productIdLabel: { zh: '商品编号（ESIN）', en: 'ESIN', ar: 'ESIN' },
+  productIdLabel: { zh: '商品编号（ESIN）', en: 'Product ID (ESIN)', ar: 'معرف المنتج (ESIN)' },
   failedTitle: { zh: '发布失败', en: 'Publish failed', ar: 'فشل النشر' },
   rerunHint: {
     zh: '重新发布将新增一条商品，原草稿保留',

@@ -80,7 +80,7 @@
               <b class="muted">{{ T('noRating') }}</b>
             </div>
             <div class="m">
-              {{ T('esin') }}
+              <span :title="T('esinFull')" style="cursor: help">{{ T('esin') }}</span>
               <b>{{ product.esin || '—' }}</b>
             </div>
             <div class="m">
