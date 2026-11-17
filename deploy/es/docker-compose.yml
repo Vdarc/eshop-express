@@ -1,0 +1,65 @@
+# Elasticsearch + Kibana（含中文 IK 分词插件）
+#
+# 启动：
+#   cd deploy/es && docker compose up -d
+#
+# 首次启动后验证：
+#   curl http://localhost:9200
+#   curl -X POST "http://localhost:9200/_analyze" -H 'Content-Type: application/json' \
+#        -d '{"analyzer":"ik_max_word","text":"纯棉透气连衣裙"}'
+#
+# 然后回到项目根目录执行同步：
+#   set SEARCH_BACKEND=es
+#   .venv\Scripts\python.exe -m backend.search.es_sync recreate
+#
+# ⚠️ 内存要求（重要）
+#   ES 单节点至少需要约 1GB JVM 堆 + 约 1GB 堆外/文件缓存，实际占用常达 2GB 以上。
+#   - 本机开发：建议堆内存 1GB（下方 ES_JAVA_OPTS）
+#   - 若部署到 2C2G 的轻量服务器，ES 与 MySQL、Flask 同时运行会触发 OOM，
+#     请改用云托管 ES，或换用 Meilisearch / Typesense 这类轻量方案（见文末说明）
+
+services:
+  elasticsearch:
+    build:
+      context: .
+      args:
+        ES_VERSION: 8.13.4
+    container_name: es-product
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    container_name: kibana-product
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - I18N_LOCALE=zh-CN
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    # Kibana 同样吃内存，纯命令行调试可整体注释掉本服务
+    profiles: ["with-kibana"]
+
+volumes:
+  es_data:
+    driver: local

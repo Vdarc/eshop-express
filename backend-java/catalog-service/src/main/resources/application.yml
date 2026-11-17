@@ -1,0 +1,29 @@
+server.port: ${CATALOG_PORT:8082}
+spring:
+  application.name: catalog-service
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/ecommerce?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+management.endpoints.web.exposure.include: health,info,metrics,prometheus
+# ES 9.x 默认开启 security，只监听 HTTPS。默认值写 http 会连不上，
+# 而 available() 会吞掉异常静默回落 MySQL（搜索召回从 568 掉到 28），
+# 表现为「能搜到但结果明显变少」，很难察觉，所以默认值直接用 https。
+# 自签证书需配 app.search.trust-store，见 backend-java/run-all.bat。
+app.search.url: ${ES_URL:https://localhost:9200}
+app.search.index: ${ES_INDEX:product}
+app.search.username: ${ES_USERNAME:}
+app.search.password: ${ES_PASSWORD:}
+app.search.enabled: ${ES_ENABLED:true}
+app.search.use-for-browse: ${ES_USE_FOR_BROWSE:false}
+app.canal.enabled: ${CANAL_ENABLED:false}
+app.canal.host: ${CANAL_HOST:localhost}
+app.canal.port: ${CANAL_PORT:11111}
+app.canal.destination: ${CANAL_DESTINATION:product_sync}
+app.canal.username: ${CANAL_USERNAME:canal}
+app.canal.password: ${CANAL_PASSWORD:canal123456}
+app.canal.client-id: ${CANAL_CLIENT_ID:1001}
+app.canal.filter: ${CANAL_FILTER:ecommerce\.(product|product_image)}
+app.canal.batch-size: ${CANAL_BATCH_SIZE:100}
+app.canal.timeout-ms: ${CANAL_TIMEOUT_MS:1000}

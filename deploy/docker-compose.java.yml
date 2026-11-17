@@ -1,0 +1,97 @@
+services:
+  gateway-service:
+    build:
+      context: ..
+      dockerfile: backend-java/Dockerfile
+      args: { MODULE: gateway-service }
+    environment:
+      GATEWAY_PORT: 10682
+      AUTH_SERVICE_URL: http://auth-service:8081
+      CATALOG_SERVICE_URL: http://catalog-service:8082
+      TRANSLATION_SERVICE_URL: http://translation-service:8083
+      RECOMMENDATION_SERVICE_URL: http://recommendation-service:8084
+      CATALOG_SERVICE_URL: http://catalog-service:8082
+      PLATFORM_SERVICE_URL: http://platform-service:8085
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?set JWT_SECRET_KEY}
+    ports: ["10682:10682"]
+    depends_on: [auth-service, catalog-service, translation-service, recommendation-service, platform-service]
+
+  auth-service:
+    build: { context: .., dockerfile: backend-java/Dockerfile, args: { MODULE: auth-service } }
+    environment: &java-service-env
+      DB_URL: ${DB_URL:-jdbc:mysql://host.docker.internal:3306/ecommerce?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
+      DB_USERNAME: ${DB_USERNAME:-root}
+      DB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?set JWT_SECRET_KEY}
+    expose: ["8081"]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+
+  catalog-service:
+    build: { context: .., dockerfile: backend-java/Dockerfile, args: { MODULE: catalog-service } }
+    environment:
+      <<: *java-service-env
+      ES_URL: ${ES_URL:-http://host.docker.internal:9200}
+      ES_INDEX: ${ES_INDEX:-product}
+      ES_USERNAME: ${ES_USERNAME:-}
+      ES_PASSWORD: ${ES_PASSWORD:-}
+      ES_ENABLED: ${ES_ENABLED:-true}
+      ES_USE_FOR_BROWSE: ${ES_USE_FOR_BROWSE:-false}
+      CANAL_ENABLED: ${CANAL_ENABLED:-false}
+      CANAL_HOST: ${CANAL_HOST:-host.docker.internal}
+      CANAL_PORT: ${CANAL_PORT:-11111}
+      CANAL_DESTINATION: ${CANAL_DESTINATION:-product_sync}
+      CANAL_USERNAME: ${CANAL_USERNAME:-canal}
+      CANAL_PASSWORD: ${CANAL_PASSWORD:-canal123456}
+      CANAL_CLIENT_ID: ${CANAL_CLIENT_ID:-1001}
+      CANAL_FILTER: ${CANAL_FILTER:-ecommerce\.(product|product_image)}
+      CANAL_BATCH_SIZE: ${CANAL_BATCH_SIZE:-100}
+      CANAL_TIMEOUT_MS: ${CANAL_TIMEOUT_MS:-1000}
+    expose: ["8082"]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+
+  translation-service:
+    build: { context: .., dockerfile: backend-java/Dockerfile, args: { MODULE: translation-service } }
+    environment:
+      <<: *java-service-env
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.deepseek.com}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL_NAME: ${LLM_MODEL_NAME:-deepseek-chat}
+    expose: ["8083"]
+
+  recommendation-service:
+    build: { context: .., dockerfile: backend-java/Dockerfile, args: { MODULE: recommendation-service } }
+    environment:
+      <<: *java-service-env
+      EMBEDDING_SERVICE_URL: ${EMBEDDING_SERVICE_URL:-http://host.docker.internal:10683}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.deepseek.com}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL_NAME: ${LLM_MODEL_NAME:-deepseek-chat}
+      REDIS_HOST: ${REDIS_HOST:-host.docker.internal}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_DB: ${REDIS_DB:-1}
+      GATEWAY_PUBLIC_URL: ${GATEWAY_PUBLIC_URL:-http://localhost:10682}
+    expose: ["8084"]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+
+  platform-service:
+    build: { context: .., dockerfile: backend-java/Dockerfile, args: { MODULE: platform-service } }
+    environment:
+      <<: *java-service-env
+      TRANSLATION_SERVICE_URL: http://translation-service:8083
+      RECOMMENDATION_SERVICE_URL: http://recommendation-service:8084
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.deepseek.com}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL_NAME: ${LLM_MODEL_NAME:-deepseek-chat}
+      ASSISTANT_FAQ_PATH: /app/data/assistant_faq.json
+      ASSISTANT_INDEX_DIR: /app/data/assistant-index
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - "../backend/uploads:/app/uploads"
+      - "../data/assistant_faq.json:/app/data/assistant_faq.json:ro"
+      - "java-assistant-index:/app/data/assistant-index"
+    expose: ["8085"]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+
+volumes:
+  java-assistant-index:

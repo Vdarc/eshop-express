@@ -1,0 +1,21 @@
+server.port: ${TRANSLATION_PORT:8083}
+spring:
+  application.name: translation-service
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/ecommerce?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data.redis:
+    host: ${REDIS_HOST:127.0.0.1}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: ${REDIS_DB:1}
+    connect-timeout: ${REDIS_CONNECT_TIMEOUT:2s}
+    timeout: ${REDIS_SOCKET_TIMEOUT:2s}
+app.llm:
+  base-url: ${LLM_BASE_URL:https://api.deepseek.com}
+  api-key: ${LLM_API_KEY:}
+  model: ${LLM_MODEL_NAME:deepseek-chat}
+  timeout: ${LLM_TIMEOUT:30s}
+management.endpoints.web.exposure.include: health,info,metrics,prometheus

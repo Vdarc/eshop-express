@@ -1,0 +1,24 @@
+server.port: ${RECOMMENDATION_PORT:8084}
+spring:
+  application.name: recommendation-service
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/ecommerce?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data.redis:
+    host: ${REDIS_HOST:127.0.0.1}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: ${REDIS_DB:1}
+    connect-timeout: ${REDIS_CONNECT_TIMEOUT:2s}
+    timeout: ${REDIS_SOCKET_TIMEOUT:2s}
+app:
+  embedding.base-url: ${EMBEDDING_SERVICE_URL:http://localhost:10683}
+  llm.base-url: ${LLM_BASE_URL:https://api.deepseek.com}
+  llm.api-key: ${LLM_API_KEY:}
+  llm.model: ${LLM_MODEL_NAME:deepseek-chat}
+  gateway.public-url: ${GATEWAY_PUBLIC_URL:http://localhost:10682}
+  redis.failure-threshold: ${REDIS_FAILURE_THRESHOLD:3}
+  redis.cooldown-seconds: ${REDIS_COOLDOWN_SECONDS:30}
+management.endpoints.web.exposure.include: health,info,metrics,prometheus

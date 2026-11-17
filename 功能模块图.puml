@@ -1,0 +1,74 @@
+@startuml
+
+skinparam componentStyle rectangle
+skinparam backgroundColor white
+skinparam shadowing false
+
+' 用户管理模块
+component "用户管理" as UserManagement {
+  component "登录注册" as LoginRegister
+  component "商家注册" as MerchantRegister
+  component "角色权限" as RolePermission
+}
+
+' 商品管理模块
+component "商品管理" as ProductManagement {
+  component "商品发布" as ProductPublish
+  component "商品展示" as ProductDisplay
+  component "商品详情" as ProductDetail
+  component "商品下架" as ProductOffline
+}
+
+' 翻译功能模块
+component "翻译功能" as TranslationFunction {
+  component "智能翻译" as SmartTranslation
+  component "翻译历史" as TranslationHistory
+  component "术语库" as TermLibrary
+}
+
+' 推荐系统模块
+component "推荐系统" as RecommendationSystem {
+  component "商品推荐" as ProductRecommendation
+  component "用户行为记录" as UserBehaviorRecord
+}
+
+' 系统管理模块
+component "系统管理" as SystemManagement {
+  component "仪表盘" as Dashboard
+  component "数据统计" as DataStatistics
+  component "日志管理" as LogManagement
+}
+
+' 商家管理模块
+component "商家管理" as MerchantManagement {
+  component "商家审核" as MerchantAudit
+  component "商品管理" as MerchantProductManagement
+}
+
+' 模块间关系
+UserManagement --> ProductManagement : 使用
+UserManagement --> TranslationFunction : 使用
+UserManagement --> RecommendationSystem : 使用
+UserManagement --> SystemManagement : 管理
+UserManagement --> MerchantManagement : 管理
+
+ProductManagement --> TranslationFunction : 调用
+ProductManagement --> RecommendationSystem : 数据提供
+ProductManagement --> MerchantManagement : 被管理
+
+TranslationFunction --> ProductManagement : 翻译结果
+TranslationFunction --> RecommendationSystem : 翻译数据
+
+RecommendationSystem --> UserManagement : 推荐结果
+RecommendationSystem --> ProductManagement : 推荐数据
+
+SystemManagement --> UserManagement : 监控
+SystemManagement --> ProductManagement : 监控
+SystemManagement --> TranslationFunction : 监控
+SystemManagement --> RecommendationSystem : 监控
+SystemManagement --> MerchantManagement : 监控
+
+MerchantManagement --> UserManagement : 审核
+MerchantManagement --> ProductManagement : 管理
+
+@enduml

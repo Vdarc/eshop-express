@@ -1,0 +1,141 @@
+# ============================================================
+# 凭据与本地配置（绝对不能提交）
+# ============================================================
+.env
+.env.local
+.env.*.local
+backend-java/env.bat
+deploy/cloud/cloud.env
+deploy/cloud/操作清单.md
+*.pem
+*.key
+*.p12
+*.jks
+
+# ============================================================
+# 大体量依赖与产物
+# ============================================================
+# 全量备份（14G）
+backup/
+*.rar
+
+# 模型权重（2.8G）
+huggingface_cache/
+**/huggingface_cache/
+
+# Java 编译产物
+backend-java/**/build/
+backend-java/.gradle/
+backend-java/**/*.jar
+
+# 前端依赖与构建产物
+node_modules/
+**/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+
+# Maven / Gradle
+target/
+out/
+*.war
+*.class
+*.hprof
+
+# 本地数据库文件
+*.db
+*.sqlite
+*.sqlite3
+*.mv.db
+*.trace.db
+
+# ============================================================
+# 运行时数据（可重建 / 属用户数据）
+# ============================================================
+.tmp/
+data/assistant-index/
+assistant-index/
+uploads/
+backend/uploads/
+backend-java/uploads/
+logs/
+backend-java/logs/
+deploy/cloud/logs/
+
+# 数据库/数据导出（含真实数据与密码哈希）
+test/output/
+*.csv
+export/
+
+deploy/mysql/ecommerce_full_*.sql
+deploy/mysql/*_backup_*.sql
+deploy/mysql/*before_snowflake*.sql
+
+
+# 本地专用配置（模板可留，如 application-dev.template.yml）
+application-local.yml
+application-local.yaml
+application-dev.yml
+application-dev.yaml
+bootstrap-local.yml
+
+# 命令行凭据
+.netrc
+.npmrc
+.pypirc
+
+# ============================================================
+# 工作区与个人材料
+# ============================================================
+.workbuddy/
+deliverables/
+README.local.md
+.idea/
+.trae/
+backend-java/.run/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# ============================================================
+# 本地调试残留
+# ============================================================
+*.log
+*.tmp
+*.bak
+*.bak[0-9]
+dist.bak*
+nul
+
+# 本地工具脚本（仅用于本地代码统计）
+count_code.py
+simple_counter.py
+package.json
+package-lock.json
+
+# ============================================================
+# 开发期脚本（不随仓库分发；run-all.bat 已用 if exist 兼容缺失）
+# ============================================================
+backend-java/*.py
+backend-java/smoke_*.py
+backend-java/verify_*.py
+backend-java/migrate_*.py
+backend-java/preflight.py
+
+# 运维/压测脚本（一次性用途，且硬编码本地连接信息）
+test/
+
+# 原始数据集（爬虫产出，非代码）
+data/amazon/
+data/recommendation_data/
+
+# 上传文件（用户数据）
+backend/uploads/

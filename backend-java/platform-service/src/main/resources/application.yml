@@ -1,0 +1,31 @@
+server.port: ${PLATFORM_PORT:8085}
+spring:
+  application.name: platform-service
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/ecommerce?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data.redis:
+    host: ${REDIS_HOST:127.0.0.1}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: ${REDIS_DB:1}
+    connect-timeout: ${REDIS_CONNECT_TIMEOUT:2s}
+    timeout: ${REDIS_SOCKET_TIMEOUT:2s}
+app:
+  embedding.base-url: ${EMBEDDING_SERVICE_URL:http://localhost:10683}
+  translation.url: ${TRANSLATION_SERVICE_URL:http://localhost:8083}
+  recommendation.url: ${RECOMMENDATION_SERVICE_URL:http://localhost:8084}
+  catalog.url: ${CATALOG_SERVICE_URL:http://localhost:8082}
+  upload-dir: ${UPLOAD_DIR:../backend/uploads}
+  llm.base-url: ${LLM_BASE_URL:https://api.deepseek.com}
+  llm.api-key: ${LLM_API_KEY:}
+  llm.model: ${LLM_MODEL_NAME:deepseek-chat}
+  assistant:
+    faq-path: ${ASSISTANT_FAQ_PATH:../data/assistant_faq.json}
+    index-dir: ${ASSISTANT_INDEX_DIR:../data/assistant-index}
+spring.servlet.multipart:
+  max-file-size: ${UPLOAD_MAX_FILE_SIZE:10MB}
+  max-request-size: ${UPLOAD_MAX_REQUEST_SIZE:10MB}
+management.endpoints.web.exposure.include: health,info,metrics,prometheus

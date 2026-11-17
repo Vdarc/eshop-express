@@ -1,0 +1,6 @@
+pluginManagement {
+    repositories { gradlePluginPortal(); mavenCentral() }
+}
+
+rootProject.name = 'traslation-system'
+include 'platform-common', 'gateway-service', 'auth-service', 'catalog-service', 'translation-service', 'recommendation-service', 'platform-service'

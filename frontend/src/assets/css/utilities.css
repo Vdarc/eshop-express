@@ -1,0 +1,857 @@
+/* =============================================================
+ * 工具类与兼容层  ·  utilities.css
+ *
+ * 背景：模板里长期使用一批「类 Tailwind」的类名（grid-cols-3 / text-3xl /
+ * md:grid-cols-2 …），但项目从未安装 Tailwind，这些类此前**完全不存在**，
+ * 导致仪表盘统计卡、账号管理表格等布局退化成单列堆叠。
+ *
+ * 两种处理方式：
+ *   A. 逐个组件改模板 —— 20 个文件、风险高、易漏
+ *   B. 按实际用到的子集补齐语义 —— 一次生效、模板零改动
+ * 这里选 B，并顺带给表格/弹窗/表单补上统一外观。
+ *
+ * 层叠位置：本文件最后加载，工具类可覆盖基础组件；
+ *          组件内 <style scoped> 因带 [data-v-*] 属性，仍优先于本文件。
+ * ============================================================= */
+
+/* -------------------------------------------------------------
+ * 1. 布局
+ * ------------------------------------------------------------- */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.flex-1 {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+
+.grid {
+  display: grid;
+}
+
+.grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.self-center {
+  align-self: center;
+}
+
+.block {
+  display: block;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+.hidden {
+  display: none;
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.overflow-x-auto {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.w-12 {
+  width: 48px;
+}
+
+.h-12 {
+  height: 48px;
+}
+
+.h-64 {
+  height: 256px;
+}
+
+.max-w-md {
+  max-width: 448px;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.min-w-0 {
+  min-width: 0;
+}
+
+/* -------------------------------------------------------------
+ * 2. 间距（4px 基准）
+ * ------------------------------------------------------------- */
+.gap-1 {
+  gap: 4px;
+}
+
+.gap-2 {
+  gap: 8px;
+}
+
+.gap-3 {
+  gap: 12px;
+}
+
+.gap-4 {
+  gap: 16px;
+}
+
+.gap-6 {
+  gap: 24px;
+}
+
+.p-1 {
+  padding: 4px;
+}
+
+.p-2 {
+  padding: 8px;
+}
+
+.p-3 {
+  padding: 12px;
+}
+
+.p-4 {
+  padding: 16px;
+}
+
+.p-12 {
+  padding: 48px;
+}
+
+.px-2 {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.px-3 {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.py-0\.5 {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.py-1 {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.py-4 {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.py-8 {
+  padding-top: 32px;
+  padding-bottom: 32px;
+}
+
+.py-20 {
+  padding-top: 80px;
+  padding-bottom: 80px;
+}
+
+.pt-2 {
+  padding-top: 8px;
+}
+
+.pt-4 {
+  padding-top: 16px;
+}
+
+.pb-2 {
+  padding-bottom: 8px;
+}
+
+.mb-1 {
+  margin-bottom: 4px;
+}
+
+.mb-2 {
+  margin-bottom: 8px;
+}
+
+.mb-3 {
+  margin-bottom: 12px;
+}
+
+.mb-4 {
+  margin-bottom: 16px;
+}
+
+.mb-6 {
+  margin-bottom: 24px;
+}
+
+.mt-1 {
+  margin-top: 4px;
+}
+
+.mt-2 {
+  margin-top: 8px;
+}
+
+.mt-3 {
+  margin-top: 12px;
+}
+
+.mt-4 {
+  margin-top: 16px;
+}
+
+.mt-6 {
+  margin-top: 24px;
+}
+
+.mr-1 {
+  margin-right: 4px;
+}
+
+.mr-2 {
+  margin-right: 8px;
+}
+
+.mr-3 {
+  margin-right: 12px;
+}
+
+.ml-2 {
+  margin-left: 8px;
+}
+
+/* 纵向节奏：给相邻子元素依次加间距，避免逐个写 mb-* */
+.space-y-2 > * + * {
+  margin-top: 8px;
+}
+
+.space-y-3 > * + * {
+  margin-top: 12px;
+}
+
+.space-y-4 > * + * {
+  margin-top: 16px;
+}
+
+.space-x-2 > * + * {
+  margin-left: 8px;
+}
+
+/* -------------------------------------------------------------
+ * 3. 文字
+ * ------------------------------------------------------------- */
+.text-xs {
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+
+.text-sm {
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+.text-base {
+  font-size: 14px;
+}
+
+.text-lg {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.text-xl {
+  font-size: 17px;
+  line-height: 1.45;
+  letter-spacing: -.01em;
+}
+
+.text-2xl {
+  font-size: 20px;
+  line-height: 1.4;
+  letter-spacing: -.02em;
+}
+
+.text-3xl {
+  font-size: 26px;
+  line-height: 1.25;
+  letter-spacing: -.03em;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.leading-tight {
+  line-height: 1.35;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* -------------------------------------------------------------
+ * 4. 颜色（语义化，不再出现 #333 / #777 这类散值）
+ * ------------------------------------------------------------- */
+.text-gray-400 {
+  color: var(--ink-4);
+}
+
+.text-gray-500 {
+  color: var(--ink-3);
+}
+
+.text-gray-600 {
+  color: var(--ink-2);
+}
+
+.text-gray-700 {
+  color: var(--ink);
+}
+
+.text-red-500 {
+  color: var(--danger);
+}
+
+.text-red-600 {
+  color: var(--danger-ink);
+}
+
+.text-red-700 {
+  color: var(--danger-ink);
+}
+
+.text-green-500 {
+  color: var(--ok);
+}
+
+.text-green-600 {
+  color: var(--ok-ink);
+}
+
+.text-green-700 {
+  color: var(--ok-ink);
+}
+
+.text-blue-500 {
+  color: var(--brand);
+}
+
+.text-blue-600 {
+  color: var(--brand);
+}
+
+.text-blue-800 {
+  color: var(--brand-ink);
+}
+
+.text-yellow-500 {
+  color: #b8860b;
+}
+
+.text-orange-700 {
+  color: var(--warn-ink);
+}
+
+.text-purple-700 {
+  color: #6741d9;
+}
+
+.text-teal-700 {
+  color: var(--ok-ink);
+}
+
+.bg-gray-50 {
+  background-color: var(--bg-soft);
+}
+
+.bg-gray-100 {
+  background-color: var(--bg-sink);
+}
+
+.bg-white {
+  background-color: #fff;
+}
+
+.bg-blue-50 {
+  background-color: var(--brand-soft);
+}
+
+.bg-blue-100 {
+  background-color: var(--brand-100);
+}
+
+.bg-green-50 {
+  background-color: var(--ok-soft);
+}
+
+.bg-green-100 {
+  background-color: var(--ok-soft);
+}
+
+.bg-red-50 {
+  background-color: var(--danger-soft);
+}
+
+.bg-red-100 {
+  background-color: var(--danger-soft);
+}
+
+.bg-yellow-50 {
+  background-color: #fff9db;
+}
+
+.bg-orange-50 {
+  background-color: var(--warn-soft);
+}
+
+.bg-purple-50 {
+  background-color: #f3f0ff;
+}
+
+.bg-teal-50 {
+  background-color: var(--ok-soft);
+}
+
+/* -------------------------------------------------------------
+ * 5. 边框 / 圆角 / 状态
+ * ------------------------------------------------------------- */
+.border {
+  border: 1px solid var(--line);
+}
+
+.border-t {
+  border-top: 1px solid var(--line);
+}
+
+.border-b {
+  border-bottom: 1px solid var(--line);
+}
+
+.border-b-2 {
+  border-bottom: 2px solid var(--line);
+}
+
+.border-blue-600 {
+  border-color: var(--brand);
+}
+
+.border-collapse {
+  border-collapse: collapse;
+}
+
+.rounded {
+  border-radius: var(--r-sm);
+}
+
+.rounded-lg {
+  border-radius: var(--r);
+}
+
+.rounded-full {
+  border-radius: var(--r-pill);
+}
+
+.rounded-l {
+  border-top-left-radius: var(--r-sm);
+  border-bottom-left-radius: var(--r-sm);
+}
+
+.rounded-l-none {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed;
+}
+
+.opacity-50 {
+  opacity: .5;
+}
+
+.transition-shadow {
+  transition: box-shadow var(--t-base) var(--ease-out),
+    border-color var(--t-base) var(--ease-out),
+    transform var(--t-base) var(--ease-out);
+}
+
+.hover\:bg-gray-50:hover {
+  background-color: var(--bg-soft);
+}
+
+.hover\:shadow-md:hover {
+  box-shadow: var(--shadow-2);
+}
+
+/* 小圆点状态（旧模板里的 inline 色块） */
+.rounded-full.h-2.w-2,
+.w-2.h-2 {
+  width: 8px;
+  height: 8px;
+}
+
+/* -------------------------------------------------------------
+ * 6. 卡片 / 面板兼容
+ * ------------------------------------------------------------- */
+/* 旧模板用 .card 包裹整页，内层再放 .border.p-4 当作统计卡 */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-1);
+  padding: 20px 22px;
+  margin-bottom: 16px;
+}
+
+.card > h2:first-child,
+.card > .flex:first-child > h2:first-child {
+  font-size: 18px;
+  letter-spacing: -.02em;
+  line-height: 1.4;
+}
+
+/* 卡片内的 h3/h4 分区标题：统一节奏，避免裸文字 */
+.card h3 {
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+
+.card h4 {
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+
+/* 统计色块（bg-blue-50 / bg-purple-50 等 + border）补一点层次 */
+.card .border.rounded.p-4,
+.card .border.rounded-lg.p-4 {
+  border-color: var(--line);
+  box-shadow: none;
+  background-image: none;
+  position: relative;
+  transition: box-shadow var(--t-base) var(--ease-out),
+    border-color var(--t-base) var(--ease-out);
+}
+
+.card .border.rounded.p-4:hover,
+.card .border.rounded-lg.p-4:hover {
+  border-color: var(--line-3);
+  box-shadow: var(--shadow-1);
+}
+
+/* 卡片里的大数字统一等宽 */
+.card .text-3xl {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  color: var(--ink);
+}
+
+/* -------------------------------------------------------------
+ * 7. 表格：旧模板是裸 <table class="w-full border-collapse">
+ *    单元格上挂着 .border.p-2，会画出满格网格线（Excel 感）。
+ *    这里把单元格的 .border 降级为「行分隔线」，表格瞬间干净。
+ * ------------------------------------------------------------- */
+.card table,
+.ui-card table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.card table thead th,
+.ui-card table thead th {
+  text-align: left;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-3);
+  background: var(--bg-soft);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  padding: 10px 12px;
+  white-space: nowrap;
+}
+
+.card table thead tr,
+.ui-card table thead tr {
+  background: transparent;
+}
+
+.card table tbody td,
+.ui-card table tbody td {
+  border: 0;
+  border-bottom: 1px solid var(--line-2);
+  padding: 11px 12px;
+  color: var(--ink);
+  vertical-align: middle;
+}
+
+.card table tbody tr,
+.ui-card table tbody tr {
+  transition: background-color var(--t-fast) var(--ease-out);
+}
+
+.card table tbody tr:hover,
+.ui-card table tbody tr:hover {
+  background: var(--bg-soft);
+}
+
+.card table tbody tr:last-child td,
+.ui-card table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* 单元格上的 .border.p-2：保留内边距，去掉四周描边 */
+.card table td.border,
+.card table th.border {
+  border: 0;
+  border-bottom: 1px solid var(--line-2);
+}
+
+.card table thead th.border {
+  border-bottom: 1px solid var(--line);
+}
+
+/* 表格首列略宽、可读性更好 */
+.card table tbody td:first-child {
+  font-variant-numeric: tabular-nums;
+}
+
+/* -------------------------------------------------------------
+ * 8. 弹窗：UserManagement / Profile / Glossary 各自定义了 scoped
+ *    样式，但 MerchantApproval 等没有。这里给一份统一默认值。
+ * ------------------------------------------------------------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 22, 40, .46);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: var(--z-modal);
+  animation: mask-in var(--t-base) var(--ease-out) both;
+}
+
+.modal-content {
+  width: min(520px, 100%);
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  background: #fff;
+  border-radius: var(--r-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-3);
+  animation: modal-in var(--t-base) var(--ease-spring) both;
+}
+
+.modal-content h3 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  margin-bottom: 16px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--line-2);
+}
+
+.modal-body {
+  display: grid;
+  gap: 14px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-2);
+}
+
+/* 表单组（Profile / Glossary / MerchantProductManagement 的旧写法） */
+.form-group {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+
+/* -------------------------------------------------------------
+ * 9. 响应式断点（只覆盖旧模板真正用到的组合）
+ * ------------------------------------------------------------- */
+@media (min-width: 768px) {
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .md\:flex-row {
+    flex-direction: row;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lg\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .lg\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .card {
+    padding: 15px 14px;
+    border-radius: var(--r);
+  }
+
+  .card .grid.grid-cols-2,
+  .card .grid.grid-cols-3,
+  .card .grid.grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .card table thead th,
+  .card table tbody td {
+    padding: 9px 10px;
+    font-size: 12px;
+  }
+
+  /* 窄屏不要把 6 列表格压成竖排文字：给表格一个下限宽度，由容器横向滚动 */
+  .overflow-x-auto > table {
+    min-width: 660px;
+  }
+
+  .modal-overlay {
+    padding: 12px;
+    align-items: flex-end;
+  }
+
+  .modal-content {
+    max-height: calc(100vh - 24px);
+    padding: 18px;
+  }
+}

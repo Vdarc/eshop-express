@@ -1,0 +1,55 @@
+server:
+  # 前端 vite proxy 指向 10600，默认值必须与之一致。
+  # 原 Flask 网关用 10682，若此处留 10682，不传参启动会让前端全部 404。
+  port: ${GATEWAY_PORT:10600}
+spring:
+  application:
+    name: gateway-service
+  main:
+    web-application-type: reactive
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods: [GET, POST, PUT, DELETE, OPTIONS]
+            allowedHeaders: "*"
+            allowCredentials: true
+      # 注意：predicates 必须是「每个谓词一个列表项」，
+      # 写成 predicates: [Path=a,b] 会被解析成两个谓词（Path=a 与 b），启动即失败。
+      routes:
+        - id: auth-service
+          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/login,/api/register,/api/register/**,/api/update-password
+        - id: catalog-merchant-service
+          uri: ${CATALOG_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/merchant/products,/api/merchant/products/**
+        - id: uploads-service
+          uri: ${PLATFORM_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/uploads/**
+        - id: platform-service
+          uri: ${PLATFORM_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/api/glossary/**,/api/user/**,/api/role/**,/api/merchant/**,/api/log/**,/api/stat/click,/api/stat/daily,/api/stat/click-rank,/api/dashboard,/api/health/deps,/api/assistant/**,/api/product/publish,/api/product/*/unpublish,/api/product/upload-image,/api/check-compliance
+        - id: catalog-service
+          uri: ${CATALOG_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/products,/api/products/**,/api/product/**,/api/search/**
+        - id: translation-service
+          uri: ${TRANSLATION_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/translate,/api/translate/**,/api/stat/translate,/api/stat/translate/**
+        - id: recommendation-service
+          uri: ${RECOMMENDATION_SERVICE_URL:http://localhost:8084}
+          predicates:
+            - Path=/api/recommend,/api/recommend/**
+app:
+  jwt:
+    secret: ${JWT_SECRET_KEY:replace-this-with-a-long-random-secret-at-least-32-bytes}
+management:
+  endpoints.web.exposure.include: health,info,metrics,prometheus
+  endpoint.health.show-details: never
