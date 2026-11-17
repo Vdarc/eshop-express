@@ -42,6 +42,12 @@ public final class OperationAuditInterceptor implements HandlerInterceptor {
             Exception exception) {
         String action = action(request);
         if (action == null) return;
+        // 分页噪声抑制：日志列表的后续页不重复留痕。
+        // 只对 GET 取 page 参数——对 POST 调 getParameter 会提前解析请求体。
+        String pageParam =
+                "GET".equalsIgnoreCase(request.getMethod()) ? request.getParameter("page") : null;
+        if (!OperationAuditSupport.shouldRecord(
+                request.getMethod(), request.getRequestURI(), pageParam)) return;
         if (action.equals("用户登录") && response.getStatus() >= 400) return;
         try {
             long started =

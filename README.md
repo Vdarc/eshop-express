@@ -63,6 +63,59 @@
 
 **六个服务按业务边界切分，不是按技术分层切分**——`catalog` 只管商品与检索、`translation` 只管翻译，跨服务走 HTTP。好处是每个服务可独立重启（部署时只重启过 `translation-service` 验证改动）。
 
+### 功能模块
+
+```mermaid
+graph TB
+    subgraph 卖家["👤 卖家"]
+        T1["智能翻译<br/>三版译文"]
+        T2["术语库<br/>翻译前约束"]
+        T3["术语反哺<br/>候选提取"]
+        T4["商品发布<br/>合规预检"]
+        T5["商品管理<br/>多语种编辑"]
+        T6["智能推荐<br/>LLM 精排"]
+        T7["翻译历史<br/>用量统计"]
+    end
+
+    subgraph 买家["🛒 买家"]
+        B1["商品列表"]
+        B2["多语种搜索"]
+        B3["商品详情<br/>13 语种字段"]
+        B4["空结果三态"]
+    end
+
+    subgraph 管理["⚙️ 管理员"]
+        A1["运营仪表盘"]
+        A2["账号管理"]
+        A3["商家审核"]
+        A4["操作日志"]
+    end
+
+    subgraph 服务["服务层"]
+        S1["auth"]
+        S2["catalog"]
+        S3["translation"]
+        S4["recommendation"]
+        S5["platform"]
+    end
+
+    T1 --> S3
+    T2 --> S5
+    T3 --> S5
+    T4 --> S5
+    T5 --> S2
+    T6 --> S4
+    T7 --> S3
+    B1 --> S2
+    B2 --> S2
+    B3 --> S2
+    B4 --> S2
+    A1 --> S5
+    A2 --> S5
+    A3 --> S5
+    A4 --> S5
+```
+
 ---
 
 ## 技术亮点（含量化数据）
@@ -149,6 +202,20 @@ Redis 不可达时不拖垮接口，而是快速失败。
 - hit@1 = 12/12（**12 条小样本，按 FAQ 反推的口语化改写，不是线上准确率**）
 - 无关问题全部拒答
 - 模型不可用时降级返回检索原文，而非报错
+
+---
+
+## 界面预览
+
+| 卖家 · 智能翻译 | 买家 · 搜索结果 |
+| :---: | :---: |
+| ![翻译](docs/screenshots/03-translate-result.png) | ![搜索](docs/screenshots/11-buyer-search.png) |
+
+| 运营仪表盘 | 商品详情 |
+| :---: | :---: |
+| ![仪表盘](docs/screenshots/17-admin-dashboard.png) | ![详情](docs/screenshots/12-buyer-detail.png) |
+
+**19 张全量截图 + 逐页功能说明 → [`docs/功能演示.md`](docs/功能演示.md)**
 
 ---
 

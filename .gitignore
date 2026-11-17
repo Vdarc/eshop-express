@@ -139,3 +139,6 @@ data/recommendation_data/
 
 # 上传文件（用户数据）
 backend/uploads/
+
+# 浏览器自动化临时产物
+.playwright-cli/

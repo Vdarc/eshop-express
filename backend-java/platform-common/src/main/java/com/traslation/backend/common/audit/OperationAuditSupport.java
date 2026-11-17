@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 操作审计的纯函数集合：路由→动作映射、身份/参数脱敏、UTF-8 安全截断、客户端 IP 解析。
@@ -21,6 +22,13 @@ final class OperationAuditSupport {
 
     /** 请求参数（含请求体）序列化后的最大长度，避免日志行过长。 */
     static final int PARAMS_MAX_BYTES = 4000;
+
+    /**
+     * 「以浏览列表为意图」的只读路由白名单：这些路由的后续页不重复留痕。
+     *
+     * <p>刻意只放一条，加路由时这里是唯一改动点。
+     */
+    private static final Set<String> PAGED_READ_ONLY_ROUTES = Set.of("/api/log/list");
 
     private OperationAuditSupport() {}
 
@@ -77,6 +85,42 @@ final class OperationAuditSupport {
         if ("PUT".equals(method) && uri.matches("/api/merchant/products/[^/]+")) return "更新商品";
         if ("DELETE".equals(method) && uri.matches("/api/merchant/products/[^/]+")) return "下架商品";
         return null;
+    }
+
+    /**
+     * 分页浏览的审计噪声抑制：同一份列表的后续页不重复留痕。
+     *
+     * <p>只对「以浏览列表为意图」的只读接口生效，且只跳过 page &gt; 1 的请求； page
+     * 缺失、非数字、&lt;=1 一律照常记录 —— 宁可多记，不可漏记。
+     *
+     * @param method HTTP 方法，大小写不敏感
+     * @param uri 请求路径（不含 query string），允许带尾部 {@code /}
+     * @param pageParam 分页参数原始值，可为 null（缺省）
+     * @return true 记录日志；false 跳过
+     */
+    public static boolean shouldRecord(String method, String uri, String pageParam) {
+        // 非 GET 一律照常记录：写操作没有「分页浏览」这回事
+        if (method == null || !"GET".equalsIgnoreCase(method)) return true;
+        if (uri == null) return true;
+
+        // 容忍尾部斜杠：/api/log/list/ 与 /api/log/list 视为同一路由
+        String path = uri;
+        while (path.length() > 1 && path.endsWith("/")) path = path.substring(0, path.length() - 1);
+        if (!PAGED_READ_ONLY_ROUTES.contains(path)) return true;
+
+        // page 缺失 / 空串：视为第一页，照常记录
+        if (pageParam == null) return true;
+        String raw = pageParam.trim();
+        if (raw.isEmpty()) return true;
+
+        int page;
+        try {
+            page = Integer.parseInt(raw);
+        } catch (NumberFormatException ignored) {
+            // 解析失败（如 "abc"、超长数字）不放行跳过，宁可多记
+            return true;
+        }
+        return page <= 1;
     }
 
     /**
